@@ -18,14 +18,6 @@ SUBSTORE_VERSION="${SUBSTORE_VERSION:-}"
 
 root_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
-# 版本锁定：仓库根目录存在 .substore-pin 时，强制使用锁定的 Sub-Store 版本（覆盖环境变量）
-if [[ -f "${root_dir}/.substore-pin" ]]; then
-  PIN_VERSION="$(tr -d '[:space:]' < "${root_dir}/.substore-pin")"
-  if [[ -n "${PIN_VERSION}" ]]; then
-    SUBSTORE_VERSION="${PIN_VERSION}"
-    log "检测到版本锁定文件，锁定版本: ${SUBSTORE_VERSION}"
-  fi
-fi
 work_dir="${root_dir}/sub-store"
 backend_dir="${work_dir}/backend"
 marker_file="${work_dir}/.substore-version"
@@ -38,6 +30,14 @@ warn() {
   printf '%s\n' "[fetch-substore] 警告：$*" >&2
 }
 
+# 版本锁定：仓库根目录存在 .substore-pin 时，强制使用锁定的 Sub-Store 版本（覆盖环境变量）
+if [[ -f "${root_dir}/.substore-pin" ]]; then
+  PIN_VERSION="$(tr -d '[:space:]' < "${root_dir}/.substore-pin")"
+  if [[ -n "${PIN_VERSION}" ]]; then
+    SUBSTORE_VERSION="${PIN_VERSION}"
+    log "检测到版本锁定文件，锁定版本: ${SUBSTORE_VERSION}"
+  fi
+fi
 require_cmd() {
   command -v "$1" >/dev/null 2>&1 || {
     echo "[fetch-substore] 缺少依赖命令：$1" >&2
